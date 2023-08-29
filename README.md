@@ -3,10 +3,10 @@
 Provides redirection of ECS scoring events to an VipLab questions pool plugin.
 
 **Minimum ILIAS Version:**
-5.2.2
+8.0.0
 
 **Maximum ILIAS Version:**
-5.4.999
+8.999.999
 
 **Responsible Developer:**
 Per Pascal Seeland
