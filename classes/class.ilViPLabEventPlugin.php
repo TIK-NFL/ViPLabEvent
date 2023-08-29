@@ -24,19 +24,16 @@ class ilViPLabEventPlugin extends ilEventHookPlugin
 	 */
 	public static function getInstance()
 	{
-		global $ilPluginAdmin;
+        if (self::$instance) {
+            return self::$instance;
+        }
 
-		if (self::$instance)
-		{
-			return self::$instance;
-		}
-		include_once './Services/Component/classes/class.ilPluginAdmin.php';
-		return self::$instance = ilPluginAdmin::getPluginObject(
-					self::CTYPE, 
-					self::CNAME, 
-					self::SLOT_ID, 
-					self::PNAME
-		);
+        global $DIC;
+
+        $component_factory = $DIC['component.factory'];
+        $instance = $component_factory->getPlugin('viplabevent');
+
+        return self::$instance = $instance;
 	}
 	
 	/**
@@ -45,35 +42,13 @@ class ilViPLabEventPlugin extends ilEventHookPlugin
 	 * @param type $a_event
 	 * @param type $a_parameter
 	 */
-	public function handleEvent($a_component, $a_event, $a_parameter)
+	public function handleEvent($a_component, $a_event, $a_parameter): void
 	{
 		ilLoggerFactory::getLogger('viplabevent')->debug('New event: '. $a_event.' from component: ' .$a_component);
 		
-		if($a_component == 'Services/WebServices/ECS' and $a_event == 'newEcsEvent')
-		{
-			// redirect event to viplab plugin 
-			$active = $GLOBALS['ilPluginAdmin']->getActivePluginsForSlot(
-				IL_COMP_MODULE,
-				'TestQuestionPool',
-				'qst'
-			);
-			foreach($active as $num => $info)
-			{
-				if($info == 'assViPLab')
-				{
-					$obj = ilPluginAdmin::getPluginObject(
-						IL_COMP_MODULE,
-						'TestQuestionPool',
-						'qst', 
-						$info
-					);
-					
-					if($obj instanceof ilassViPLabPlugin )
-					{
-						$obj->handleEcsEvent($a_event, $a_parameter);
-					}
-				}
-			}
+		if ($a_component == 'Services/WebServices/ECS' and $a_event == 'newEcsEvent') {
+            $plugin = ilassViPLabPlugin::getInstance();
+            $plugin->handleEcsEvent($a_event, $a_parameter);
 		}
 	}
 	
@@ -82,7 +57,7 @@ class ilViPLabEventPlugin extends ilEventHookPlugin
 	 * Get plugin name
 	 * @return string
 	 */
-	public function getPluginName()
+	public function getPluginName(): string
 	{
 		return self::PNAME;
 	}
@@ -90,7 +65,7 @@ class ilViPLabEventPlugin extends ilEventHookPlugin
 	/**
 	 * Init auto load
 	 */
-	protected function init()
+	protected function init(): void
 	{
 		$this->initAutoLoad();
 	}
@@ -121,7 +96,10 @@ class ilViPLabEventPlugin extends ilEventHookPlugin
 			return;
 		}
 	}
-	
+
+    protected function getClassesDirectory() : string
+    {
+        return $this->getDirectory() . "/classes";
+    }
 
 }
-?>
